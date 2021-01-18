@@ -1,6 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const path = require('path');
 const dotenv = require("dotenv");
 
 //setup Express
@@ -34,5 +35,10 @@ app.use("/user", authRoute);
 app.use("/room", roomRoutes);
 app.use("/transaction", transactionalRoutes);
 app.use("/transaction", balanceSheetRoutes);
+app.use(express.static(path.join(__dirname, '..', 'build')));
+//Serve the all the static files of the website
+app.use('*', function(req, res) {
+    res.sendFile(path.join(__dirname, '..', 'build', 'index.html'));
+});
 
 app.listen(PORT, () => console.log(`Server is running on port:${PORT}`));
