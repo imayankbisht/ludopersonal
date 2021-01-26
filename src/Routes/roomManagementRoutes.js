@@ -1,9 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const Room = require("../Models/roomManagementModel");
+const { encrypt, auth } = require("../Middleware/middleware");
 
 //CREATE ROOM
-router.post("/createroom", async (req, res) => {
+router.post("/createroom", auth, async (req, res) => {
   try {
     const { bet, rakePercent, rakeCap } = req.body;
 
@@ -26,38 +27,55 @@ router.post("/createroom", async (req, res) => {
 });
 
 //GET ALL ROOM
-router.get("/all", async (req, res) => {
+router.get("/all", auth, async (req, res) => {
   const rooms = await Room.find({});
   // rooms.map((room) => {
   //   let e = (room.bet - room.rakeCap) * 2;
   //   return rooms.push({ totalPrize: e });
   // });
-  res.status(200).json(rooms);
+  const allrooms = await encrypt(rooms);
+  // console.log(allrooms);
+  res.status(200).json(allrooms);
 });
 
 //GET EDIT ROOM
-router.get("/edit/:id", async (req, res) => {
-  const loadRoom = await Room.find({
+router.get("/edit/:id", auth, async (req, res) => {
+  const loadroom = await Room.find({
     _id: req.params.id
   });
-  res.json({ loadRoom });
+  console.log(loadroom);
+  const loadRoom = await encrypt(loadroom);
+  res.json(loadRoom);
 });
 
 //EDIT ROOM
-router.put("/edit/:id", async (req, res) => {
-  const { room } = req.body;
-  console.log(room);
+router.put("/edit/:id", auth, async (req, res) => {
+  // const { room } = req.body;
+  // console.log(room);
+  const { bet, rakePercent, rakeCap } = req.body;
+  console.log(bet, rakePercent, rakeCap);
+  const totalPrize = (bet - rakeCap) * 2;
+  // console.log(totalPrize);
+
+  const roomUpdate = {
+    bet,
+    rakePercent,
+    rakeCap,
+    totalPrize
+  };
+
   const loadRoom = await Room.updateMany(
     {
       _id: req.params.id
     },
-    room
+    roomUpdate
   );
-  res.json({ loadRoom });
+  // console.log(loadRoom);
+  res.status(200).json({ msg: "Room Updated Successfully !!!" });
 });
 
 //DELETE ROOM
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", auth, async (req, res) => {
   const room = await Room.find({
     _id: req.params.id
   });
