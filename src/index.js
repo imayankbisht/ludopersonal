@@ -2,6 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const dotenv = require("dotenv");
+const path = require("path");
 
 //setup Express
 const app = express();
@@ -10,7 +11,12 @@ app.use(cors());
 dotenv.config();
 
 const PORT = process.env.PORT || 3000;
-console.log("hello testing");
+
+app.use(express.static(path.join(__dirname, '..', 'build')));
+//Serve the all the static files of the website
+app.use('*', function(req, res) {
+    res.sendFile(path.join(__dirname, '..', 'build', 'index.html'));
+});
 
 mongoose
   .connect(
